@@ -13,6 +13,7 @@
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+mod serial;
 mod vga_buffer;
 
 use core::panic::PanicInfo;
@@ -38,9 +39,23 @@ pub extern "C" fn _start() -> ! {
 /// Custom panic handler. This is a requirement for no_std. We can't do
 /// something truly meaningful at this time. Just loop forever, ie
 /// freeze the system.
+#[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
+    loop {}
+}
+
+/// Panic handler for tests. Unlike the normal panic handler, this one
+/// prints to the serial port that is redirected to stdout.
+/// Additionally, it closes qemu and returns an exit code to indicate
+/// failure.
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    serial_println!("[failed]\n");
+    serial_println!("Error: {}", info);
+    exit_qemu(QemuExitCode::Failed);
     loop {}
 }
 
@@ -65,7 +80,7 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
 
 #[cfg(test)]
 fn test_runner(tests: &[&dyn Fn()]) {
-    println!("Running {} tests", tests.len());
+    serial_println!("Running {} tests", tests.len());
     for test in tests {
         test();
     }
@@ -77,7 +92,7 @@ fn test_runner(tests: &[&dyn Fn()]) {
 /// Because of our peculiar setup that is not a given.
 #[test_case]
 fn trivial_assertion() {
-    print!("Trivial assertion... ");
+    serial_print!("Trivial assertion... ");
     assert_eq!(1, 1);
-    println!("[ok]");
+    serial_println!("[ok]");
 }

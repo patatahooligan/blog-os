@@ -6,7 +6,11 @@ edition = "2018"
 [package.metadata.bootimage]
 # Enable an I/O port in qemu that gives us an easy way to power off in
 # a clean software way and to return an exit code.
-test-args = ["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04"]
+test-args = [
+    "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04",
+    "-serial", "stdio",
+    "-display", "none"
+]
 test-success-exit-code = 33
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -14,6 +18,7 @@ test-success-exit-code = 33
 [dependencies]
 bootloader = "0.9.8"
 spin = "0.9.4"
+uart_16550 = "0.2.18"
 volatile = "0.2.6"
 x86_64 = "0.14.2"
 
