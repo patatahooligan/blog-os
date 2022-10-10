@@ -1,3 +1,5 @@
+use core::fmt;
+use core::fmt::Write;
 use volatile::Volatile;
 
 const BUFFER_HEIGHT: usize = 25;
@@ -117,6 +119,13 @@ impl Writer {
     }
 }
 
+impl fmt::Write for Writer {
+    fn write_str(&mut self, s :&str) -> fmt::Result {
+        self.write_string(s);
+        Ok(())
+    }
+}
+
 // TODO: transform this into a proper test
 pub fn print_something() {
     let mut writer = Writer {
@@ -125,5 +134,5 @@ pub fn print_something() {
         buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
     };
 
-    writer.write_string("Hello world!");
+    write!(writer, "Hello {}!", "world").unwrap();
 }
