@@ -16,7 +16,9 @@ use core::panic::PanicInfo;
 // state that this is the entry point.
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    vga_buffer::print_something();
+    use core::fmt::Write;
+
+    writeln!(vga_buffer::WRITER.lock(), "Hello {}!", "world").unwrap();
 
     // Since our executable is an OS, it can't simply exit. Looping
     // indefinitely is a way to "stop" when we're done.

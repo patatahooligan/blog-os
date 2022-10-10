@@ -1,9 +1,26 @@
 use core::fmt;
-use core::fmt::Write;
+use lazy_static::lazy_static;
+use spin::Mutex;
 use volatile::Volatile;
 
 const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH: usize = 80;
+
+// The lazy static is required here because we don't want compile time
+// evaluation of the pointer.
+//
+// TODO: Revaluate the need for lazy_static. Some of Rust's restrictions
+// on statics have been relaxed. Additionally, there might be better
+// libraries for it.
+lazy_static! {
+    /// Global static instance of [Writer]. Has a simple spinlock to
+    /// allow use in multithreaded kernels.
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
+        column_position: 0,
+        color_code: ColorCode::new(Color::Yellow, Color::Black),
+        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+    });
+}
 
 /// Color byte for the VGA buffer. The VGA buffer requires both a
 /// foreground and a background color, so we can't use this enum
@@ -142,16 +159,4 @@ impl fmt::Write for Writer {
         self.write_string(s);
         Ok(())
     }
-}
-
-// TODO: transform this into a proper test
-pub fn print_something() {
-    let mut writer = Writer {
-        column_position: 0,
-        color_code: ColorCode::new(Color::Yellow, Color::Black),
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    };
-
-    writeln!(writer, "Hello {}!", "world").unwrap();
-    writeln!(writer, "Hello again {}!", "world").unwrap();
 }
