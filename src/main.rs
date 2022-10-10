@@ -27,6 +27,7 @@ pub extern "C" fn _start() -> ! {
 /// something truly meaningful at this time. Just loop forever, ie
 /// freeze the system.
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
+fn panic(info: &PanicInfo) -> ! {
+    println!("{}", info);
     loop {}
 }
