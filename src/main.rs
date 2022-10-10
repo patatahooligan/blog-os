@@ -3,7 +3,6 @@
 // of "main", see _start() below.
 #![no_main]
 #![no_std]
-
 // Because of #![no_std], we don't have access to the normal testing
 // framework (and we probably couldn't use it anyway because of the
 // peculiar nature of our executable). So we define our own test runner.
@@ -45,12 +44,33 @@ fn panic(info: &PanicInfo) -> ! {
     loop {}
 }
 
+/// An exit code that can be passed to qemu's serial port.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
+pub enum QemuExitCode {
+    Success = 0x10,
+    Failed = 0x11,
+}
+
+/// Exit qemu with the given exit code. Note that qemu shifts this value
+/// to add a trailing 1 bit. The result is (exit_code << 1) | 1.
+pub fn exit_qemu(exit_code: QemuExitCode) {
+    use x86_64::instructions::port::Port;
+
+    unsafe {
+        let mut port = Port::new(0xf4);
+        port.write(exit_code as u32);
+    }
+}
+
 #[cfg(test)]
 fn test_runner(tests: &[&dyn Fn()]) {
     println!("Running {} tests", tests.len());
     for test in tests {
         test();
     }
+
+    exit_qemu(QemuExitCode::Success);
 }
 
 /// Silly assertion just to make sure the testing framework is working.
