@@ -67,6 +67,29 @@ pub enum QemuExitCode {
     Failed = 0x11,
 }
 
+/// Wrapper type to use for unit tests.
+pub trait Testable {
+    /// Simple wrapper to eliminate unit test boilerplate.
+    ///  - print object's name
+    ///  - run `self`
+    ///  - print "\[ok]\"
+    ///
+    /// This never prints "\[failed\]" or similar, because if a test
+    /// fails, the panic handler does that.
+    fn run(&self) -> ();
+}
+
+impl<T> Testable for T
+where
+    T: Fn(),
+{
+    fn run(&self) {
+        serial_print!("{}...\t", core::any::type_name::<T>());
+        self();
+        serial_println!("[ok]");
+    }
+}
+
 /// Exit qemu with the given exit code. Note that qemu shifts this value
 /// to add a trailing 1 bit. The result is (exit_code << 1) | 1.
 pub fn exit_qemu(exit_code: QemuExitCode) {
@@ -79,10 +102,10 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
 }
 
 #[cfg(test)]
-fn test_runner(tests: &[&dyn Fn()]) {
+fn test_runner(tests: &[&dyn Testable]) {
     serial_println!("Running {} tests", tests.len());
     for test in tests {
-        test();
+        test.run();
     }
 
     exit_qemu(QemuExitCode::Success);
@@ -92,7 +115,5 @@ fn test_runner(tests: &[&dyn Fn()]) {
 /// Because of our peculiar setup that is not a given.
 #[test_case]
 fn trivial_assertion() {
-    serial_print!("Trivial assertion... ");
     assert_eq!(1, 1);
-    serial_println!("[ok]");
 }
