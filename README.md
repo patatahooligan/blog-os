@@ -15,10 +15,8 @@ The project specifies that it requires the nightly branch, so you
 shouldn't have to set it as your system default or anything.
 
 Additionally, to build a bootable image we require the `bootimage` tool
-and the `llvm-tools-preview` component.
 
     cargo install bootimage
-    rustup component add llvm-tools-preview
 
 Then, to create a bootable image, run
 
