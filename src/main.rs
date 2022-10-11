@@ -14,16 +14,12 @@
 #![reexport_test_harness_main = "test_main"]
 
 use blog_os::println;
+use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 
-/// Print "Hello World!" using the VGA buffer. This is a toy _start
-/// function to simply have something to test.
-// Disable mangling because we need the linker to see this as exactly
-// "_start". For similar reasons, use the C calling convention. The C
-// linker looks for _start by default, so we don't have to explicitly
-// state that this is the entry point.
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+entry_point!(kernel_main);
+
+fn kernel_main(_boot_info: &'static BootInfo) -> ! {
     println!("Hello {}!", "world");
 
     blog_os::init();
