@@ -1,3 +1,4 @@
+use bootloader::bootinfo::{MemoryMap, MemoryRegionType};
 use x86_64::structures::paging::{
     FrameAllocator, Mapper, OffsetPageTable, Page, PageTable, PhysFrame,
     Size4KiB,
@@ -53,10 +54,48 @@ pub fn create_example_mapping(
     map_to_result.expect("map_to failed").flush()
 }
 
-pub struct EmptyFrameAllocator;
+/// Frame Allocator that returns usable frames from the bootloader's
+/// memory map.
+pub struct BootInfoFrameAllocator {
+    memory_map: &'static MemoryMap,
+    next: usize,
+}
 
-unsafe impl FrameAllocator<Size4KiB> for EmptyFrameAllocator {
+impl BootInfoFrameAllocator {
+    /// Create a BootInfoFrameAllocator from the passed memory map.
+    ///
+    /// This is unsafe because the caller must guarantee:
+    ///  - the passed memory map is valid
+    ///  - no more than one BootInfoFrameAllocator is ever `init`d
+    pub unsafe fn init(memory_map: &'static MemoryMap) -> Self {
+        BootInfoFrameAllocator {
+            memory_map,
+            next: 0,
+        }
+    }
+
+    fn usable_frames(&self) -> impl Iterator<Item = PhysFrame> {
+        // Get only the usable regions
+        let usable_regions = self
+            .memory_map
+            .iter()
+            .filter(|r| r.region_type == MemoryRegionType::Usable);
+
+        // Map each region to its address range
+        let addr_ranges =
+            usable_regions.map(|r| r.range.start_addr()..r.range.end_addr());
+
+        let frame_addresses = addr_ranges.flat_map(|r| r.step_by(4096));
+
+        frame_addresses
+            .map(|addr| PhysFrame::containing_address(PhysAddr::new(addr)))
+    }
+}
+
+unsafe impl FrameAllocator<Size4KiB> for BootInfoFrameAllocator {
     fn allocate_frame(&mut self) -> Option<PhysFrame> {
-        None
+        let frame = self.usable_frames().nth(self.next);
+        self.next += 1;
+        frame
     }
 }
