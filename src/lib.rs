@@ -1,17 +1,24 @@
 #![no_std]
 #![cfg_attr(test, no_main)]
 #![feature(custom_test_frameworks)]
+#![feature(abi_x86_interrupt)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+pub mod interrupts;
 pub mod serial;
 pub mod vga_buffer;
 
 pub use core::panic::PanicInfo;
 
+pub fn init() {
+    interrupts::init_idt();
+}
+
 #[cfg(test)]
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
+    init();
     test_main();
     loop {}
 }
@@ -82,4 +89,13 @@ pub fn test_runner(tests: &[&dyn Testable]) {
     }
 
     exit_qemu(QemuExitCode::Success);
+}
+
+/// Throw a breakpoint exception to verify that it works. Note that this
+/// does not check its behavior. But the fact that the function returns
+/// instead of panicking at leats verifies that we register the
+/// exception handler.
+#[test_case]
+fn test_breakpoint_exception() {
+    x86_64::instructions::interrupts::int3();
 }
