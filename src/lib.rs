@@ -19,10 +19,10 @@ pub fn init() {
     x86_64::instructions::interrupts::enable();
 }
 
-/// Loop endlessly, calling 'hlt' on every iteration. This should keep
-/// the kernel running and eg responding to interrupts, but also allow
-/// the CPU to drop to a lower power state, assuming nothing else is
-/// happening.
+/// Loop endlessly, calling 'hlt' on every iteration. This should be
+/// used in every place where we want an empty infinite loop to keep the
+/// kernel running and reacting to interrupts, but we don't really have
+/// anything to do in the current thread.
 pub fn hlt_loop() -> ! {
     loop {
         x86_64::instructions::hlt();
