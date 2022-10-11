@@ -19,19 +19,29 @@ pub fn init() {
     x86_64::instructions::interrupts::enable();
 }
 
+/// Loop endlessly, calling 'hlt' on every iteration. This should keep
+/// the kernel running and eg responding to interrupts, but also allow
+/// the CPU to drop to a lower power state, assuming nothing else is
+/// happening.
+pub fn hlt_loop() -> ! {
+    loop {
+        x86_64::instructions::hlt();
+    }
+}
+
 #[cfg(test)]
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     init();
     test_main();
-    loop {}
+    hlt_loop()
 }
 
 pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("[failed]\n");
     serial_println!("Error: {}", info);
     exit_qemu(QemuExitCode::Failed);
-    loop {}
+    hlt_loop()
 }
 
 /// Panic handler for tests. Unlike the normal panic handler, this one

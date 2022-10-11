@@ -33,7 +33,7 @@ pub extern "C" fn _start() -> ! {
 
     // Since our executable is an OS, it can't simply exit. Looping
     // indefinitely is a way to "stop" when we're done.
-    loop {}
+    blog_os::hlt_loop();
 }
 
 /// Custom panic handler. This is a requirement for no_std. We can't do
@@ -43,7 +43,7 @@ pub extern "C" fn _start() -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    blog_os::hlt_loop();
 }
 
 #[cfg(test)]

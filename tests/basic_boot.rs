@@ -16,7 +16,7 @@ fn panic(info: &PanicInfo) -> ! {
 pub extern "C" fn _start() -> ! {
     test_main();
 
-    loop {}
+    blog_os::hlt_loop()
 }
 
 #[test_case]

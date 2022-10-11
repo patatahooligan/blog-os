@@ -11,7 +11,7 @@ use core::panic::PanicInfo;
 fn panic(_info: &PanicInfo) -> ! {
     serial_println!("[ok]");
     exit_qemu(QemuExitCode::Success);
-    loop {}
+    blog_os::hlt_loop()
 }
 
 #[no_mangle]
@@ -20,7 +20,7 @@ pub extern "C" fn _start() -> ! {
     serial_println!("[test did not panic]");
     exit_qemu(QemuExitCode::Failed);
 
-    loop {}
+    blog_os::hlt_loop()
 }
 
 /// Make a trivial false assertion. This tests two different but related
