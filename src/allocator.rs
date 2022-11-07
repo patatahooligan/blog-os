@@ -1,3 +1,4 @@
+pub mod fixed_size_block;
 pub mod linked_list;
 
 use x86_64::structures::paging::mapper::MapToError;
@@ -6,11 +7,11 @@ use x86_64::structures::paging::{
 };
 use x86_64::VirtAddr;
 
-use linked_list::LinkedListAllocator;
+use fixed_size_block::FixedSizeBlockAllocator;
 
 #[global_allocator]
-static ALLOCATOR: Locked<LinkedListAllocator> =
-    Locked::new(LinkedListAllocator::new());
+static ALLOCATOR: Locked<FixedSizeBlockAllocator> =
+    Locked::new(FixedSizeBlockAllocator::new());
 
 pub const HEAP_START: usize = 0x_4444_4444_0000;
 pub const HEAP_SIZE: usize = 100 * 1024;
