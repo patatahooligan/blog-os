@@ -1,3 +1,9 @@
+//! Hardware interrupts
+//!
+//! Defines and enables handlers for hardware interrupts, eg getting
+//! input from a keyboard. Just call [init_idt] to register the
+//! callbacks. Normally, you would rely on [crate::init] to do this.
+
 use crate::{gdt, hlt_loop, print, println};
 use pic8259::ChainedPics;
 use spin;

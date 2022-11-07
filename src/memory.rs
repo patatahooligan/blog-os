@@ -1,10 +1,12 @@
+//! Memory paging
+
 use bootloader::bootinfo::{MemoryMap, MemoryRegionType};
 use x86_64::structures::paging::{
     FrameAllocator, OffsetPageTable, PageTable, PhysFrame, Size4KiB,
 };
 use x86_64::{PhysAddr, VirtAddr};
 
-/// Initialize a new OffsetPageTable
+/// Initialize a new [OffsetPageTable].
 ///
 /// It is unsafe because the caller must guarantee that the entire
 /// physical address is mapped at the offset given as the argument.

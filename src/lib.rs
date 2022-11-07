@@ -20,6 +20,7 @@ pub mod vga_buffer;
 use bootloader::{entry_point, BootInfo};
 pub use core::panic::PanicInfo;
 
+/// Initialize all structures required by the kernel.
 pub fn init() {
     interrupts::init_idt();
     gdt::init();
@@ -27,7 +28,7 @@ pub fn init() {
     x86_64::instructions::interrupts::enable();
 }
 
-/// Loop endlessly, calling 'hlt' on every iteration. This should be
+/// Loop endlessly, calling `hlt` on every iteration. This should be
 /// used in every place where we want an empty infinite loop to keep the
 /// kernel running and reacting to interrupts, but we don't really have
 /// anything to do in the current thread.

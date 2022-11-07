@@ -1,3 +1,25 @@
+//! Write text to the VGA buffer
+//!
+//! The simplest way to use this crate is via [crate::print] and
+//! [crate::println]. Note that we don't have access to `std::print` and
+//! `std::println`. So it is recommended to `use` these macros so that
+//! you can use them in place of the `std` ones like a normal Rust
+//! program would.
+//!
+//! ```
+//! use blog_os::println;
+//!
+//! fn kernel_main(_boot_info: &'static BootInfo) -> ! {
+//!     println!("Hello {}!", "world");
+//! }
+//! ```
+//!
+//! You can use the [struct@WRITER] directly, but it's not recommended
+//! as it doesn't offer anything over the macros. Note that
+//! [struct@WRITER] already holds a mutable reference to the VGA buffer
+//! (`0xb8000`), so don't create another [Writer] instance for the same
+//! buffer!
+
 use core::fmt;
 use lazy_static::lazy_static;
 use spin::Mutex;
@@ -6,11 +28,16 @@ use volatile::Volatile;
 const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH: usize = 80;
 
+/// Print to the vga buffer, similar to how `std::fmt::print` would
+/// behave in a terminal if it were available to us.
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
 }
 
+/// Print to the vga buffer, similar to how `std::fmt::println` would
+/// behave in a terminal if it were available to us. Equivalent to
+/// [print] with an appended `\n`.
 #[macro_export]
 macro_rules! println {
     () => ($crate::print!("\n"));
@@ -55,7 +82,7 @@ lazy_static! {
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum Color {
+enum Color {
     Black = 0,
     Blue = 1,
     Green = 2,

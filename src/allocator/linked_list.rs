@@ -49,7 +49,7 @@ pub struct LinkedListAllocator {
 ///    If we do switch to sorted lists, then that's another performance
 ///    hit.
 impl LinkedListAllocator {
-    /// Create an empty LinkedListAllocator.
+    /// Create an empty [LinkedListAllocator].
     pub const fn new() -> Self {
         Self {
             head: ListNode::new(0),

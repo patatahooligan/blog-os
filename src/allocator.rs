@@ -1,3 +1,10 @@
+//! Heap allocation implementation
+//!
+//! Before using anything that requires heap allocations, like vectors
+//! or strings, you are required to call [init_heap] exactly once! You
+//! don't have to do anything else, as the module uses
+//! `#[global_allocator]` to set the allocator globally.
+
 pub mod fixed_size_block;
 pub mod linked_list;
 

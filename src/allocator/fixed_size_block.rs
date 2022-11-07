@@ -20,7 +20,7 @@ struct ListNode {
 /// The allocator works like a collection of linked list allocators with
 /// two important differences:
 ///  - it uses multiple lists of free memory regions
-///  - each list has a fixed size, specifically the sizes in BLOCK_SIZES
+///  - each list has a fixed size
 ///
 ///  This design allows fast allocation times. For small allocations,
 ///  the allocator rounds up the size to a power of two and simply grabs
@@ -35,8 +35,8 @@ struct ListNode {
 ///  allocations and deallocations we expect to not need the fallback
 ///  allocator very often.
 ///
-///  If the requested allocation size is bigger than any element in
-///  BLOCK_SIZES, then use the fallback allocator.
+///  If the requested allocation size is too big for any of the fixed
+///  size pools, the fallback allocator is used instead.
 ///
 ///  Some important observations on this type of allocator:
 ///   - Rounding up to fixed sizes means that some parts of the
@@ -61,7 +61,7 @@ pub struct FixedSizeBlockAllocator {
 }
 
 impl FixedSizeBlockAllocator {
-    /// Create an empty FixedSizeBlockAllocator.
+    /// Create an empty [FixedSizeBlockAllocator].
     pub const fn new() -> Self {
         const EMPTY: Option<&'static mut ListNode> = None;
         FixedSizeBlockAllocator {

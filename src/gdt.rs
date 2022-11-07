@@ -1,3 +1,9 @@
+//! Initialize the
+//! [global descriptor table](https://en.wikipedia.org/wiki/Global_Descriptor_Table)
+//!
+//! All you have to do is call [init] once. Normally you would do that
+//! through [crate::init].
+
 use lazy_static::lazy_static;
 use x86_64::structures::gdt::{
     Descriptor, GlobalDescriptorTable, SegmentSelector,
